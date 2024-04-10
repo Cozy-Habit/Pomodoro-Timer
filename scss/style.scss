@@ -1,0 +1,318 @@
+:root {
+    /*LIGHT MODE*/
+    /*----------------------*/
+    /*Button Primary Idle*/
+    --button-primary-color: white;
+    --button-primary-backgroundColor: transparent;
+    --button-primary-border: white;
+    /*Button Primary Hover*/
+    --button-primary-color-hover: #151B30;
+    --button-primary-backgroundColor-hover: white;
+    --button-primary-border-hover: white;
+    /*Button Primary Active*/
+    --button-primary-color-active: #151B30;
+    --button-primary-backgroundColor-active: white;
+    --button-primary-border-active: white;
+    /*----------------------*/
+    /*Button Secondary Idle*/
+    --button-secondary-color: #151B30;
+    --button-secondary-backgroundColor: white;
+    --button-secondary-border: white;
+    /*Button Secondary Hover*/
+    --button-secondary-color-hover: white;
+    --button-secondary-backgroundColor-hover: transparent;
+    --button-secondary-border-hover: white;
+    /*DARK MODE*/
+}
+
+*,
+ ::before,
+ ::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+}
+
+
+/*CONTAINER STYLES*/
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.containerTimerButtons {
+    display: flex;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 80px;
+}
+
+.containerControlButtons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/*TIMER STYLES*/
+
+.time {
+    font-size: 10rem;
+    color: white;
+    line-height: 9rem;
+}
+
+
+/*BUTTON STYLES*/
+
+button {
+    border: none;
+    font-family: "Poppins", sans-serif;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.containerTimerButtons button {
+    color: var(--button-primary-color);
+    background-color: var(--button-primary-backgroundColor);
+    border: 1px solid var(--button-primary-border);
+    padding: 16px 32px;
+    border-radius: 80px;
+    font-weight: 700;
+}
+
+.containerTimerButtons button.active {
+    color: var(--button-primary-color-active);
+    background-color: var(--button-primary-backgroundColor-active);
+    border: 1px solid var(--button-primary-border-active);
+    font-weight: 700;
+}
+
+.containerTimerButtons button:hover {
+    color: var(--button-primary-color-hover);
+    background-color: var(--button-primary-backgroundColor-hover);
+    border: 1px solid var(--button-primary-border-hover);
+}
+
+.containerControlButtons button {
+    background-color: transparent;
+    font-weight: 600;
+}
+
+.containerControlButtons button.controlBtn {
+    border-radius: 80px;
+    color: var(--button-secondary-color);
+    background-color: var(--button-secondary-backgroundColor);
+    border: 1px solid var(--button-secondary-border);
+    font-size: 1.5rem;
+    width: 150px;
+    height: 70px;
+}
+
+.containerControlButtons button.controlBtn:hover {
+    color: var(--button-secondary-color-hover);
+    background-color: var(--button-secondary-backgroundColor-hover);
+    border: 1px solid var(--button-secondary-border-hover);
+}
+
+.containerControlButtons button svg {
+    width: 70px;
+    height: 70px;
+}
+
+
+/*ANIMATION*/
+
+.rotate {
+    animation: rotate 1s ease-in-out;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.containerControlButtons button svg.resetBtn g {
+    stroke: var(--button-secondary-backgroundColor);
+}
+
+.containerControlButtons button svg.settingsBtn path {
+    fill: var(--button-secondary-backgroundColor);
+}
+
+
+/*FONT FEATURE*/
+
+.poppins,
+#poppins {
+    font-family: "Poppins", sans-serif;
+}
+
+.playfair,
+#playfair {
+    font-family: "Playfair Display", serif;
+}
+
+.aleo,
+#aleo {
+    font-family: "Aleo", serif;
+}
+
+#poppins,
+#playfair,
+#aleo {
+    cursor: pointer;
+}
+
+
+/*MODAL*/
+
+.modalSettings {
+    display: none;
+    background-color: white;
+    z-index: 10;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 50px;
+    position: fixed;
+}
+
+.modalSettingContent {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 40px 0px 40px;
+}
+
+.modalHeader button svg {
+    width: 32px;
+    height: 32px;
+}
+
+.modalBody {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 0px 40px;
+}
+
+.timersContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.labelInputContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.labelInput {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+input {
+    background-color: #ECF2FA;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    width: 150px;
+    font-size: 1rem;
+}
+
+select {
+    cursor: pointer;
+    background-color: #ECF2FA;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    width: 150px;
+    font-size: 1rem;
+}
+
+.fontContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.fonts>* {
+    background-color: #ECF2FA;
+    padding: 8px;
+    border-radius: 30px;
+}
+
+.themeContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.soundContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.modalBtn {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 40px 40px 40px;
+}
+
+.modalBtn .resetChangesBtn {
+    background-color: #F9716F;
+    padding: 16px 32px;
+    border-radius: 80px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.modalBtn .saveChangesBtn {
+    padding: 16px 32px;
+    border-radius: 80px;
+    font-weight: 700;
+    border: 1px solid black;
+    background-color: white;
+    font-size: 1rem;
+}
+
+.overlay {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.32);
+}
+
+.divider {
+    border-top: 1px solid lightgrey;
+}
+
+.closeBtn {
+    background-color: white;
+}

@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "jest",
+    "dev": "tsc --watch",
+    "sass-dev": "sass --watch --update --style=expanded scss:css",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.29",
+    "typescript": "^5.4.2"
+  }
+}
