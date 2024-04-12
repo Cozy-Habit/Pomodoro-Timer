@@ -1,14 +1,18 @@
-import { displayTime, displayPauseButton, displayStartButton, displayModal, hideModal } from "./display.js";
+import { displayTime, displayPauseButton, displayModal, hideModal } from "./display.js";
 import { setUpPage } from "./setUpPage.js";
 import { setButtonToActive, timerButtons, resetTimerButtons } from "./timerButtons.js";
 import { pauseTimer, stopTimer, startCounter } from "./timer.js";
 import { resetFont } from "./font.js";
+import setUpServerConnection from "./serverConnection.js";
 
 let duration: number = 0; //in minutes
 
 
 //SET-UP
 setUpPage();
+setUpServerConnection(({room, you, serverTimestamp}) => {
+    console.log(`I'm ${you}, my room is`, room)
+})
 
 //CONTROL BUTTON EVENTS
 $("#startBtn").on('click', () => {

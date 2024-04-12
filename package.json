@@ -1,12 +1,19 @@
 {
+  "type": "module",
   "scripts": {
     "test": "jest",
     "dev": "tsc --watch",
     "sass-dev": "sass --watch --update --style=expanded scss:css",
-    "build": "tsc"
+    "build": "tsc",
+    "serve": "node server"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.29",
     "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-ws": "^5.0.2",
+    "unique-names-generator": "^4.7.1"
   }
 }
