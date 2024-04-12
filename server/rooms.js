@@ -10,6 +10,7 @@ function createRoomInstance(roomName) {
         state: 'paused',
         elapsed: 0,
         duration: null,
+        sessionLabel: 'pomodoro',
         startTimestamp: null,
         updates: new EventEmitter()
     }

@@ -10,7 +10,8 @@ let duration: number = selectedDuration(); //in minutes
 
 //SET-UP
 setUpPage();
-const { broadcastPlay, broadcastPause, broadcastSetDuration } = setUpServerConnection(({ type, room, you, serverTimestamp}) => {
+
+const server = setUpServerConnection(({ type, room, you, serverTimestamp}) => {
     const timeOffset = room.startTimestamp === null ? 0 : Math.round((serverTimestamp - Date.now()) / 1000)
     const elapsedTime = room.elapsed + (room.startTimestamp === null ? 0 : Math.round((serverTimestamp - room.startTimestamp) / 1000))
     const counter = Math.max(0, Math.round(room.duration + timeOffset - elapsedTime))
@@ -20,6 +21,8 @@ const { broadcastPlay, broadcastPause, broadcastSetDuration } = setUpServerConne
     switch (type) {
         case "init":
             console.log(`I'm ${you}, my room is`, room)
+
+            actionHighlightLabel(room.sessionLabel)
 
             if (room.duration === null) {
                 actionSet(selectedDuration() * 60, true)
@@ -46,6 +49,10 @@ const { broadcastPlay, broadcastPause, broadcastSetDuration } = setUpServerConne
             actionSet(counter)
             break
 
+        case "setLabel":
+            actionHighlightLabel(room.sessionLabel)
+            break
+
         case "join":
             console.log("someone joined your room! :D")
             break
@@ -60,7 +67,7 @@ function actionPlay(broadcast = false) {
     startCounter(selectedDuration() * 60)
     displayPauseButton()
     if (broadcast) {
-        broadcastPlay()
+        server.play()
     }
 }
 
@@ -68,7 +75,7 @@ function actionPause(broadcast = false) {
     pauseTimer()
     displayStartButton()
     if (broadcast) {
-        broadcastPause()
+        server.pause()
     }
 }
 
@@ -77,17 +84,30 @@ function actionReset(broadcast = false) {
     actionPause()
     actionAdjust(duration * 60)
     if (broadcast) {
-        broadcastSetDuration(duration * 60)
+        server.setDuration(duration * 60)
     }
 }
 
 function actionSet(durationInSeconds: number, broadcast = false) {
     duration = Math.round(durationInSeconds / 60)
     if (broadcast) {
-        broadcastSetDuration(durationInSeconds)
+        server.setDuration(durationInSeconds)
     }
     actionAdjust(durationInSeconds)
     actionPause()
+}
+
+function actionHighlightLabel(label: 'pomodoro' | 'short-break' | 'long-break', broadcast = false) {
+    const mapping = {
+        'pomodoro': 'pomodoroBtn',
+        'short-break': 'shortBreakBtn',
+        'long-break': 'longBreakBtn'
+    }
+    const selector = mapping[label]
+    setButtonToActive(selector)
+    if (broadcast) {
+        server.highlightLabel(label)
+    }
 }
 
 /**
@@ -215,22 +235,19 @@ $("#resetChangesBtn").on('click', () => {
 $("#pomodoroBtn").on('click', () => {
     const minutes = parseInt(localStorage.getItem("pomodoroTime") ?? "0", 10);
     actionSet(minutes * 60, true)
-
-    setButtonToActive("pomodoroBtn");
+    actionHighlightLabel('pomodoro', true)
 })
 
 $("#shortBreakBtn").on('click', () => {
     let minutes = parseInt(localStorage.getItem("shortBreakTime") ?? "0", 10);
     actionSet(minutes * 60, true)
-
-    setButtonToActive("shortBreakBtn");
+    actionHighlightLabel('short-break', true)
 })
 
 $("#longBreakBtn").on('click', () => {
     let minutes = parseInt(localStorage.getItem("longBreakTime") ?? "0", 10);
     actionSet(minutes * 60, true)
-
-    setButtonToActive("longBreakBtn");
+    actionHighlightLabel('long-break', true)
 })
 
 //FONT FEATURE EVENTS

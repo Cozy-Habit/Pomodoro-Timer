@@ -2,14 +2,14 @@ export interface Room {
     roomName: string
     members: string[]
     state: 'paused' | 'running'
-    // mode: 'pomodoro' | 'short-break' | 'long-break' // TODO implement
+    sessionLabel: 'pomodoro' | 'short-break' | 'long-break'
     duration: number
     elapsed: number
     startTimestamp: number
 }
 
 export interface ServerUpdate {
-    type: 'init' | 'pause' | 'play' | 'set' | 'join' | 'leave'
+    type: 'init' | 'pause' | 'play' | 'set' | 'setLabel' | 'join' | 'leave'
     room: Room
     you: string
     serverTimestamp: number
@@ -28,7 +28,7 @@ function establishConnection() {
 
 export default function setUpServerConnection(onUpdate: (update: ServerUpdate) => void) {
     if (!establishConnection()) {
-        return { broadcastPlay() {}, broadcastPause() {}, broadcastSetDuration(durationInSeconds: number) {}}
+        return { play() {}, pause() {}, setDuration(durationInSeconds: number) {}, highlightLabel(label: string) {}}
     }
 
     ws.addEventListener('open', () => console.log("established connection to server!"))
@@ -43,17 +43,21 @@ export default function setUpServerConnection(onUpdate: (update: ServerUpdate) =
         setTimeout(establishConnection, 1000)
     })
 
-    function broadcastPlay() {
+    function play() {
         ws.send(JSON.stringify({type: 'play'}))
     }
 
-    function broadcastPause() {
+    function pause() {
         ws.send(JSON.stringify({type: 'pause'}))
     }
 
-    function broadcastSetDuration(durationInSeconds: number) {
+    function setDuration(durationInSeconds: number) {
         ws.send(JSON.stringify({type: 'set', newDuration: durationInSeconds}))
     }
 
-    return { broadcastPlay, broadcastPause, broadcastSetDuration }
+    function highlightLabel(label: string) {
+        ws.send(JSON.stringify({type: 'setLabel', sessionLabel: label}))
+    }
+
+    return { play, pause, setDuration, highlightLabel }
 }

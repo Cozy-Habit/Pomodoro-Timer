@@ -60,32 +60,42 @@ app.ws("/ws/:roomName", (ws, req) => {
     ws.on('message', msg => {
         const json = JSON.parse(msg)
         const { type } = json;
-        if (type === 'play') {
-            if (room.duration === null) {
-                return
-            }
-            room.state = 'running'
-            room.startTimestamp = Date.now()
-        } else if (type === 'pause') {
-            if (room.duration === null) {
-                return
-            }
-            room.state = 'paused'
-            room.elapsed += Math.round((Date.now() - room.startTimestamp)/1000)
-            room.startTimestamp = null
-        } else if (type === 'set') {
-            const { newDuration } = json
-            if (newDuration <= 0) {
-                return
-            }
-            room.duration = newDuration
-            room.elapsed = 0
-            if (room.state === 'running') {
+
+        switch (type) {
+            case 'play':
+                if (room.duration === null) {
+                    return
+                }
+                room.state = 'running'
                 room.startTimestamp = Date.now()
-            }
-        } else {
-            return
+                break
+            case 'pause':
+                if (room.duration === null) {
+                    return
+                }
+                room.state = 'paused'
+                room.elapsed += Math.round((Date.now() - room.startTimestamp)/1000)
+                room.startTimestamp = null
+                break
+            case 'set':
+                const { newDuration } = json
+                if (newDuration <= 0) {
+                    return
+                }
+                room.duration = newDuration
+                room.elapsed = 0
+                if (room.state === 'running') {
+                    room.startTimestamp = Date.now()
+                }
+                break
+            case 'setLabel':
+                room.sessionLabel = json.sessionLabel
+                break
+            default:
+                return
+
         }
+
         room.updates.emit('update', { type, causedBy: memberName })
     })
 
