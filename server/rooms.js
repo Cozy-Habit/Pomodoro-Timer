@@ -1,8 +1,6 @@
 import EventEmitter from 'events'
 import {generateUniqueMemberName} from "./names.js";
 
-const DEFAULT_DURATION = 45 * 60 // in seconds
-
 const rooms = {};
 
 function createRoomInstance(roomName) {
@@ -10,7 +8,8 @@ function createRoomInstance(roomName) {
         roomName,
         members: [],
         state: 'paused',
-        duration: DEFAULT_DURATION,
+        elapsed: 0,
+        duration: null,
         startTimestamp: null,
         updates: new EventEmitter()
     }
@@ -51,6 +50,11 @@ export function removeMember(roomName, memberName) {
             members.splice(index, 1)
         }
         room.updates.emit('update', { type: 'leave' })
-        console.log(`removed member ${memberName} from ${roomName}`)
+        console.log(`removed member ${memberName} from ${roomName})`)
+
+        // FIXME remove unused rooms... but delayed so you can come back
+        // if (room.members.length === 0) {
+        //     delete rooms[roomName]
+        // }
     }
 }

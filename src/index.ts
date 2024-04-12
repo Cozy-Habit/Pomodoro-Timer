@@ -1,37 +1,120 @@
-import { displayTime, displayPauseButton, displayModal, hideModal } from "./display.js";
+import {displayTime, displayPauseButton, displayModal, hideModal, displayStartButton} from "./display.js";
 import { setUpPage } from "./setUpPage.js";
 import { setButtonToActive, timerButtons, resetTimerButtons } from "./timerButtons.js";
-import { pauseTimer, stopTimer, startCounter } from "./timer.js";
+import {pauseTimer, stopTimer, startCounter, clearTimeStamp, setCounterTo, setTimeStamp} from "./timer.js";
 import { resetFont } from "./font.js";
 import setUpServerConnection from "./serverConnection.js";
 
-let duration: number = 0; //in minutes
+let duration: number = selectedDuration(); //in minutes
 
 
 //SET-UP
 setUpPage();
-setUpServerConnection(({room, you, serverTimestamp}) => {
-    console.log(`I'm ${you}, my room is`, room)
+const { broadcastPlay, broadcastPause, broadcastSetDuration } = setUpServerConnection(({ type, room, you, serverTimestamp}) => {
+    const timeOffset = room.startTimestamp === null ? 0 : Math.round((serverTimestamp - Date.now()) / 1000)
+    const elapsedTime = room.elapsed + (room.startTimestamp === null ? 0 : Math.round((serverTimestamp - room.startTimestamp) / 1000))
+    const counter = Math.max(0, Math.round(room.duration + timeOffset - elapsedTime))
+
+    console.log(type, room)
+
+    switch (type) {
+        case "init":
+            console.log(`I'm ${you}, my room is`, room)
+
+            if (room.duration === null) {
+                actionSet(selectedDuration() * 60, true)
+            } else {
+                actionSet(room.duration)
+                actionAdjust(counter)
+                if (room.state === 'running') {
+                    actionPlay()
+                }
+            }
+            break
+
+        case "play":
+            actionAdjust(counter)
+            actionPlay()
+            break
+
+        case "pause":
+            actionAdjust(counter)
+            actionPause()
+            break
+
+        case "set":
+            actionSet(counter)
+            break
+
+        case "join":
+            console.log("someone joined your room! :D")
+            break
+
+        case "leave":
+            console.log("someone left your room :/")
+            break
+    }
 })
+
+function actionPlay(broadcast = false) {
+    startCounter(selectedDuration() * 60)
+    displayPauseButton()
+    if (broadcast) {
+        broadcastPlay()
+    }
+}
+
+function actionPause(broadcast = false) {
+    pauseTimer()
+    displayStartButton()
+    if (broadcast) {
+        broadcastPause()
+    }
+}
+
+function actionReset(broadcast = false) {
+    stopTimer()
+    actionPause()
+    actionAdjust(duration * 60)
+    if (broadcast) {
+        broadcastSetDuration(duration * 60)
+    }
+}
+
+function actionSet(durationInSeconds: number, broadcast = false) {
+    duration = Math.round(durationInSeconds / 60)
+    if (broadcast) {
+        broadcastSetDuration(durationInSeconds)
+    }
+    actionAdjust(durationInSeconds)
+    actionPause()
+}
+
+/**
+ * Changes displayed timer, but doesn't mess with reset value
+ * @param durationInSeconds
+ */
+function actionAdjust(durationInSeconds: number) {
+    setTimeStamp(durationInSeconds)
+    setCounterTo(durationInSeconds)
+}
+
+function selectedDuration() {
+    for (const key in timerButtons) {
+        if (timerButtons[key].active) {
+            return parseInt(localStorage.getItem(timerButtons[key].localStorageKey) ?? "0", 10) ?? 0;
+        }
+    }
+    throw "There's no active button. That's weird.."
+}
 
 //CONTROL BUTTON EVENTS
 $("#startBtn").on('click', () => {
-
-    displayPauseButton();
-
-    for (const key in timerButtons) {
-        if (timerButtons[key].active) {
-            let temp: any = localStorage.getItem(timerButtons[key].localStorageKey)
-            duration = temp;
-            break;
-        }
-    }
-
-    startCounter(duration);
+    actionPlay(true)
 });
 
 $("#pauseBtn").on('click', () => {
-    pauseTimer();
+    actionPause(true)
 });
 
 $("#resetBtn").on('click', () => {
@@ -40,18 +123,7 @@ $("#resetBtn").on('click', () => {
         $("#resetBtn").removeClass("rotate");
     });
 
-    stopTimer()
-
-    //OUTPUT
-    for (const key in timerButtons) {
-        if (timerButtons[key].active) {
-            let temp: any = localStorage.getItem(timerButtons[key].localStorageKey);
-            displayTime(temp * 60);
-            break;
-        }
-    }
-
-
+    actionReset(true)
 });
 
 $("#settingsBtn").on('click', () => {
@@ -141,28 +213,22 @@ $("#resetChangesBtn").on('click', () => {
 
 //TIMER BUTTONS EVENTS
 $("#pomodoroBtn").on('click', () => {
-    let temp: any = localStorage.getItem("pomodoroTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
+    const minutes = parseInt(localStorage.getItem("pomodoroTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
 
     setButtonToActive("pomodoroBtn");
 })
 
 $("#shortBreakBtn").on('click', () => {
-    let temp: any = localStorage.getItem("shortBreakTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
+    let minutes = parseInt(localStorage.getItem("shortBreakTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
 
     setButtonToActive("shortBreakBtn");
 })
 
 $("#longBreakBtn").on('click', () => {
-    let temp: any = localStorage.getItem("longBreakTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
+    let minutes = parseInt(localStorage.getItem("longBreakTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
 
     setButtonToActive("longBreakBtn");
 })

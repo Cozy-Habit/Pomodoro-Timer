@@ -10,17 +10,21 @@ export function clearTimeStamp() {
     timeStamp = 0;
 }
 
+export function setTimeStamp(counter: number) {
+    timeStamp = counter;
+}
+
 export function stopTimer() {
     isRunning = false;
-    clearInterval(timer);
     clearTimeStamp();
+    clearInterval(timer);
     displayStartButton();
 }
 
 export function pauseTimer() {
-    clearInterval(timer);
     isRunning = false;
     timeStamp = counter;
+    clearInterval(timer);
     displayStartButton();
 }
 
@@ -41,10 +45,10 @@ export function timerDone() {
     }
 }
 
-export function startCounter(duration: any) {
+export function startCounter(duration: number) {
     if (!isRunning) {
         //CALCULATE MS
-        counter = timeStamp != 0 ? timeStamp : duration * 60;
+        counter = timeStamp != 0 ? timeStamp : duration;
         //START TIMER
         timer = setInterval(() => {
             counter--;
@@ -52,4 +56,9 @@ export function startCounter(duration: any) {
             if (counter == 0) timerDone();
         }, 1000);
     }
+}
+
+export function setCounterTo(counterInSeconds: number) {
+    counter = counterInSeconds
+    displayTime(counter)
 }

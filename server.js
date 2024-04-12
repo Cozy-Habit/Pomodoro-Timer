@@ -34,7 +34,7 @@ function createMessage(type, memberName, room) {
         type,
         room: r,
         you: memberName,
-        serverTimestamp: Date.now()
+        serverTimestamp: Date.now(),
     }
 }
 
@@ -50,20 +50,28 @@ app.ws("/ws/:roomName", (ws, req) => {
 
     ws.send(JSON.stringify(createMessage('init', memberName, room)))
 
-    room.updates.on('update', type => {
+    function updateListener({type, causedBy }) {
+        if (causedBy === memberName) { return }
         ws.send(JSON.stringify(createMessage(type, memberName, room)))
-    })
+    }
+
+    room.updates.on('update', updateListener)
 
     ws.on('message', msg => {
         const json = JSON.parse(msg)
         const { type } = json;
         if (type === 'play') {
-            room.status = 'playing'
+            if (room.duration === null) {
+                return
+            }
+            room.state = 'running'
             room.startTimestamp = Date.now()
         } else if (type === 'pause') {
-            room.status = 'paused'
-            const newDuration = room.duration - (Date.now() - room.startTimestamp)/1000
-            room.duration = newDuration > 0 ? newDuration : 0
+            if (room.duration === null) {
+                return
+            }
+            room.state = 'paused'
+            room.elapsed += Math.round((Date.now() - room.startTimestamp)/1000)
             room.startTimestamp = null
         } else if (type === 'set') {
             const { newDuration } = json
@@ -71,18 +79,20 @@ app.ws("/ws/:roomName", (ws, req) => {
                 return
             }
             room.duration = newDuration
-            if (room.status === 'playing') {
+            room.elapsed = 0
+            if (room.state === 'running') {
                 room.startTimestamp = Date.now()
             }
         } else {
             return
         }
-        room.updates.emit('update', { type })
+        room.updates.emit('update', { type, causedBy: memberName })
     })
 
     ws.on('close', () => {
         console.log("close")
         removeMember(roomName, memberName)
+        room.updates.removeListener('update', updateListener)
     })
 })
 
