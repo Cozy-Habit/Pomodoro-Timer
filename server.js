@@ -27,10 +27,11 @@ app.get('/', (req, res) => {
     res.redirect(`/room/${roomName}`)
 })
 
-function createMessage(memberName, room) {
+function createMessage(type, memberName, room) {
     const r = {...room}
     delete r.updates
     return {
+        type,
         room: r,
         you: memberName,
         serverTimestamp: Date.now()
@@ -47,15 +48,36 @@ app.ws("/ws/:roomName", (ws, req) => {
     const memberName = addMember(roomName)
     const room = getRoom(roomName)
 
-    ws.send(JSON.stringify(createMessage(memberName, room)))
+    ws.send(JSON.stringify(createMessage('init', memberName, room)))
 
-    room.updates.on('update', room => {
-        ws.send(JSON.stringify(createMessage(memberName, room)))
+    room.updates.on('update', type => {
+        ws.send(JSON.stringify(createMessage(type, memberName, room)))
     })
 
     ws.on('message', msg => {
         const json = JSON.parse(msg)
-        console.log(`${memberName} sent ${msg}`)
+        const { type } = json;
+        if (type === 'play') {
+            room.status = 'playing'
+            room.startTimestamp = Date.now()
+        } else if (type === 'pause') {
+            room.status = 'paused'
+            const newDuration = room.duration - (Date.now() - room.startTimestamp)/1000
+            room.duration = newDuration > 0 ? newDuration : 0
+            room.startTimestamp = null
+        } else if (type === 'set') {
+            const { newDuration } = json
+            if (newDuration <= 0) {
+                return
+            }
+            room.duration = newDuration
+            if (room.status === 'playing') {
+                room.startTimestamp = Date.now()
+            }
+        } else {
+            return
+        }
+        room.updates.emit('update', { type })
     })
 
     ws.on('close', () => {

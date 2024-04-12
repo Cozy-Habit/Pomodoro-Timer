@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
 import {generateUniqueMemberName} from "./names.js";
 
-const DEFAULT_DURATION = 45
+const DEFAULT_DURATION = 45 * 60 // in seconds
 
 const rooms = {};
 
@@ -38,7 +38,7 @@ export function addMember(roomName) {
     const room = getRoom(roomName)
     room.members.push(name)
     console.log(`added member with name ${name} to room ${roomName}`)
-    room.updates.emit('update', room)
+    room.updates.emit('update', { type: 'join' })
     return name
 }
 
@@ -50,7 +50,7 @@ export function removeMember(roomName, memberName) {
         if (index !== -1) {
             members.splice(index, 1)
         }
-        room.updates.emit('update', room)
+        room.updates.emit('update', { type: 'leave' })
         console.log(`removed member ${memberName} from ${roomName}`)
     }
 }
