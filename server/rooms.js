@@ -1,7 +1,18 @@
 import EventEmitter from 'events'
 import {generateUniqueMemberName} from "./names.js";
 
+const REMOVE_ROOM_AFTER = 5 * 60 * 60 * 1000 // milliseconds
+
 const rooms = {};
+
+// garbage collection of rooms
+setInterval(() => {
+    Object.entries(rooms).map(([roomName, room]) => {
+        if (room.unusedSince !== null && (Date.now() - room.unusedSince) > REMOVE_ROOM_AFTER) {
+            delete rooms[roomName]
+        }
+    })
+}, REMOVE_ROOM_AFTER * 2)
 
 function createRoomInstance(roomName) {
     return {
@@ -12,7 +23,8 @@ function createRoomInstance(roomName) {
         duration: null,
         sessionLabel: 'pomodoro',
         startTimestamp: null,
-        updates: new EventEmitter()
+        updates: new EventEmitter(),
+        unusedSince: null,
     }
 }
 
@@ -39,6 +51,7 @@ export function addMember(roomName) {
     room.members.push(name)
     console.log(`added member with name ${name} to room ${roomName}`)
     room.updates.emit('update', { type: 'join' })
+    room.unusedSince = null
     return name
 }
 
@@ -53,9 +66,8 @@ export function removeMember(roomName, memberName) {
         room.updates.emit('update', { type: 'leave' })
         console.log(`removed member ${memberName} from ${roomName})`)
 
-        // FIXME remove unused rooms... but delayed so you can come back
-        // if (room.members.length === 0) {
-        //     delete rooms[roomName]
-        // }
+        if (room.members.length === 0) {
+            room.unusedSince = Date.now()
+        }
     }
 }
