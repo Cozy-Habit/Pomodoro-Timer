@@ -1,33 +1,140 @@
-import { displayTime, displayPauseButton, displayStartButton, displayModal, hideModal } from "./display.js";
+import {displayTime, displayPauseButton, displayModal, hideModal, displayStartButton} from "./display.js";
 import { setUpPage } from "./setUpPage.js";
 import { setButtonToActive, timerButtons, resetTimerButtons } from "./timerButtons.js";
-import { pauseTimer, stopTimer, startCounter } from "./timer.js";
+import {pauseTimer, stopTimer, startCounter, clearTimeStamp, setCounterTo, setTimeStamp} from "./timer.js";
 import { resetFont } from "./font.js";
+import setUpServerConnection from "./serverConnection.js";
 
-let duration: number = 0; //in minutes
+let duration: number = selectedDuration(); //in minutes
 
 
 //SET-UP
 setUpPage();
 
-//CONTROL BUTTON EVENTS
-$("#startBtn").on('click', () => {
+const server = setUpServerConnection(({ type, room, you, serverTimestamp}) => {
+    const timeOffset = room.startTimestamp === null ? 0 : Math.round((serverTimestamp - Date.now()) / 1000)
+    const elapsedTime = room.elapsed + (room.startTimestamp === null ? 0 : Math.round((serverTimestamp - room.startTimestamp) / 1000))
+    const counter = Math.max(0, Math.round(room.duration + timeOffset - elapsedTime))
 
-    displayPauseButton();
+    console.log(type, room)
 
+    switch (type) {
+        case "init":
+            console.log(`I'm ${you}, my room is`, room)
+
+            actionHighlightLabel(room.sessionLabel)
+
+            if (room.duration === null) {
+                actionSet(selectedDuration() * 60, true)
+            } else {
+                actionSet(room.duration)
+                actionAdjust(counter)
+                if (room.state === 'running') {
+                    actionPlay()
+                }
+            }
+            break
+
+        case "play":
+            actionAdjust(counter)
+            actionPlay()
+            break
+
+        case "pause":
+            actionAdjust(counter)
+            actionPause()
+            break
+
+        case "set":
+            actionSet(counter)
+            break
+
+        case "setLabel":
+            actionHighlightLabel(room.sessionLabel)
+            break
+
+        case "join":
+            console.log("someone joined your room! :D")
+            break
+
+        case "leave":
+            console.log("someone left your room :/")
+            break
+    }
+})
+
+function actionPlay(broadcast = false) {
+    startCounter(selectedDuration() * 60)
+    displayPauseButton()
+    if (broadcast) {
+        server.play()
+    }
+}
+
+function actionPause(broadcast = false) {
+    pauseTimer()
+    displayStartButton()
+    if (broadcast) {
+        server.pause()
+    }
+}
+
+function actionReset(broadcast = false) {
+    stopTimer()
+    actionPause()
+    actionAdjust(duration * 60)
+    if (broadcast) {
+        server.setDuration(duration * 60)
+    }
+}
+
+function actionSet(durationInSeconds: number, broadcast = false) {
+    duration = Math.round(durationInSeconds / 60)
+    if (broadcast) {
+        server.setDuration(durationInSeconds)
+    }
+    actionAdjust(durationInSeconds)
+    actionPause()
+}
+
+function actionHighlightLabel(label: 'pomodoro' | 'short-break' | 'long-break', broadcast = false) {
+    const mapping = {
+        'pomodoro': 'pomodoroBtn',
+        'short-break': 'shortBreakBtn',
+        'long-break': 'longBreakBtn'
+    }
+    const selector = mapping[label]
+    setButtonToActive(selector)
+    if (broadcast) {
+        server.highlightLabel(label)
+    }
+}
+
+/**
+ * Changes displayed timer, but doesn't mess with reset value
+ * @param durationInSeconds
+ */
+function actionAdjust(durationInSeconds: number) {
+    setTimeStamp(durationInSeconds)
+    setCounterTo(durationInSeconds)
+}
+
+function selectedDuration() {
     for (const key in timerButtons) {
         if (timerButtons[key].active) {
-            let temp: any = localStorage.getItem(timerButtons[key].localStorageKey)
-            duration = temp;
-            break;
+            return parseInt(localStorage.getItem(timerButtons[key].localStorageKey) ?? "0", 10) ?? 0;
         }
     }
+    throw "There's no active button. That's weird.."
+}
 
-    startCounter(duration);
+//CONTROL BUTTON EVENTS
+$("#startBtn").on('click', () => {
+    actionPlay(true)
 });
 
 $("#pauseBtn").on('click', () => {
-    pauseTimer();
+    actionPause(true)
 });
 
 $("#resetBtn").on('click', () => {
@@ -36,18 +143,7 @@ $("#resetBtn").on('click', () => {
         $("#resetBtn").removeClass("rotate");
     });
 
-    stopTimer()
-
-    //OUTPUT
-    for (const key in timerButtons) {
-        if (timerButtons[key].active) {
-            let temp: any = localStorage.getItem(timerButtons[key].localStorageKey);
-            displayTime(temp * 60);
-            break;
-        }
-    }
-
-
+    actionReset(true)
 });
 
 $("#settingsBtn").on('click', () => {
@@ -137,30 +233,21 @@ $("#resetChangesBtn").on('click', () => {
 
 //TIMER BUTTONS EVENTS
 $("#pomodoroBtn").on('click', () => {
-    let temp: any = localStorage.getItem("pomodoroTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
-
-    setButtonToActive("pomodoroBtn");
+    const minutes = parseInt(localStorage.getItem("pomodoroTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
+    actionHighlightLabel('pomodoro', true)
 })
 
 $("#shortBreakBtn").on('click', () => {
-    let temp: any = localStorage.getItem("shortBreakTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
-
-    setButtonToActive("shortBreakBtn");
+    let minutes = parseInt(localStorage.getItem("shortBreakTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
+    actionHighlightLabel('short-break', true)
 })
 
 $("#longBreakBtn").on('click', () => {
-    let temp: any = localStorage.getItem("longBreakTime");
-    duration = temp;
-    stopTimer();
-    displayTime(duration * 60);
-
-    setButtonToActive("longBreakBtn");
+    let minutes = parseInt(localStorage.getItem("longBreakTime") ?? "0", 10);
+    actionSet(minutes * 60, true)
+    actionHighlightLabel('long-break', true)
 })
 
 //FONT FEATURE EVENTS

@@ -22,7 +22,7 @@ export function setUpPage() {
 function addDefaultBackgroundImage() {
     if (!localStorage.getItem("backgroundImage")) localStorage.setItem("backgroundImage", "cafeteria.png");
     $("body").css({
-        "background-image": `url(/img/${localStorage.getItem("backgroundImage")}.png)`
+        "background-image": `url(/img/${localStorage.getItem("backgroundImage")})`
     });
 }
 

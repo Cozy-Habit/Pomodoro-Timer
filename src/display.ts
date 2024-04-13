@@ -1,11 +1,11 @@
 /**
  * Displays the timer in H:MM:SS format if amount of minutes is greater than 59. Everything below will be displayed in MM:SS format. Minutes should be transformed into milliseconds as @param timeInMs
- * @param {*} timeInMs takes time as milliseconds
+ * @param {*} timeInSeconds takes time as in seconds
  */
-export function displayTime(timeInMs: any) {
-    let hours: number = Math.floor(Number(timeInMs) / 60 / 60);
-    let minutes: number = Math.floor(Number(timeInMs) / 60 % 60);
-    let seconds: number = Number(timeInMs) % 60;
+export function displayTime(timeInSeconds: number) {
+    let hours: number = Math.floor(Number(timeInSeconds) / 60 / 60);
+    let minutes: number = Math.floor(Number(timeInSeconds) / 60 % 60);
+    let seconds: number = Number(timeInSeconds) % 60;
 
     let hoursString: string = hours.toString();
     let minutesString: string = minutes.toString().padStart(2, "0");
