@@ -22,7 +22,8 @@ function establishConnection() {
     if (!roomName) {
         return false
     }
-    ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/${roomName}`)
+    const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
+    ws = new WebSocket(`${protocol}://${window.location.hostname}:${window.location.port}/ws/${roomName}`)
     return true
 }
 
