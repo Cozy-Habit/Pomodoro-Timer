@@ -12,7 +12,7 @@ let duration: number = selectedDuration(); //in minutes
 setUpPage();
 
 const server = setUpServerConnection(({ type, room, you, serverTimestamp}) => {
-    const timeOffset = room.startTimestamp === null ? 0 : Math.round((serverTimestamp - Date.now()) / 1000)
+    const timeOffset = room.startTimestamp === null ? 0 : Math.round((Date.now() - serverTimestamp) / 1000)
     const elapsedTime = room.elapsed + (room.startTimestamp === null ? 0 : Math.round((serverTimestamp - room.startTimestamp) / 1000))
     const counter = Math.max(0, Math.round(room.duration + timeOffset - elapsedTime))
 

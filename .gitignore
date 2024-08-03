@@ -1,4 +1,4 @@
 dist/
-css/
+#css/
 node_modules/
 .idea/
