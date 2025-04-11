@@ -1,0 +1,18 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "**/*.scss"
+      ],
+      "extends": [
+        "stylelint-config-standard-scss",
+        "stylelint-config-idiomatic-order"
+      ],
+      "rules": {
+        "selector-class-pattern": null,
+        "scss/at-function-pattern": null,
+        "function-name-case": null
+      }
+    }
+  ]
+}

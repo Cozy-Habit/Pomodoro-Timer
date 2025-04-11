@@ -1,0 +1,29 @@
+@use 'sass:map';
+@use 'sass:color';
+@forward 'design-tokens';
+
+@function mapGet($map, $keys...) {
+  $value: map.get($map, $keys...);
+
+  @if not $value {
+    @error "Value not found for keys: #{$keys}";
+  }
+
+  @return $value;
+}
+
+@function getSemanticColor($color, $shade) {
+  @return mapGet($tokens, semantic, $color, $shade);
+}
+
+@function getSpacing($spacingType) {
+  @return mapGet($tokens, spacing, $spacingType);
+}
+
+@function getBoxShadow($type, $variant) {
+  @return mapGet($tokens, Shadow, $type, $variant);
+}
+
+@function getBorderRadius($spacingType) {
+  @return mapGet($tokens, 'borderRadius', $spacingType);
+}

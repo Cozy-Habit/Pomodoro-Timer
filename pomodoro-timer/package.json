@@ -1,0 +1,47 @@
+{
+  "name": "pomodoro-timer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nx next:dev",
+    "build": "nx next:build",
+    "start": "nx next:start",
+    "lint": "next lint",
+    "storybook": "nx serve:storybook -p 6006",
+    "build-storybook": "nx build:storybook"
+  },
+  "dependencies": {
+    "next": "14.2.6",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^1.7.0",
+    "@goodhood/design-tokens": "^1.0.0",
+    "@nx/eslint": "19.7.2",
+    "@nx/next": "19.7.2",
+    "@nx/storybook": "19.7.2",
+    "@nx/web": "19.7.2",
+    "@storybook/addon-essentials": "8.2.8",
+    "@storybook/addon-interactions": "8.2.8",
+    "@storybook/addon-links": "^8.2.9",
+    "@storybook/addon-onboarding": "^8.2.9",
+    "@storybook/blocks": "^8.2.9",
+    "@storybook/nextjs": "^8.2.9",
+    "@storybook/react": "8.2.8",
+    "@storybook/test": "^8.2.9",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.6",
+    "eslint-plugin-storybook": "^0.8.0",
+    "nx": "19.7.2",
+    "storybook": "8.2.8",
+    "stylelint-config-idiomatic-order": "^10.0.0",
+    "stylelint-config-standard-scss": "^13.1.0",
+    "typescript": "^5"
+  },
+  "nx": {}
+}
